@@ -1,0 +1,47 @@
+version: '3.9'
+
+services:
+  mlflow-starter-notebook:
+    container_name: mlflow-starter-notebook
+    build:
+      context: ./docker/jupyter
+      args:
+        - MLFLOW_VERSION=${MLFLOW_VERSION}
+        - JUPYTER_BASE_IMAGE=${JUPYTER_SCIPY_IMAGE}
+        - JUPYTER_BASE_VERSION=${JUPYTER_SCIPY_VERSION}
+    image: "nassarx/mlflow-starter-notebook:1.0"
+    ports:
+      - "${JUPYTER_HOST_PORT}:${JUPYTER_PORT}"
+    environment:
+      GRANT_SUDO: "yes" # enable sudo permissions
+    user: "root"
+    #restart: always
+    command: "start-notebook.sh --NotebookApp.token=${JUPYTER_TOKEN}"
+    volumes:
+      - ./notebooks:/home/jovyan/work
+
+  mlflow-starter-server:
+    container_name: mlflow-starter-server
+    build:
+      context: ./docker/mlflow
+      args:
+        - PYTHON_VERSION=${PYTHON_VERSION}
+        - DEBIAN_VERSION=${DEBIAN_VERSION}
+        - MLFLOW_VERSION=${MLFLOW_VERSION}
+        - MLFLOW_SERVER_PORT=${MLFLOW_SERVER_PORT}
+        - MLFLOW_BACKEND=${MLFLOW_BACKEND}
+        - MLFLOW_TRACKING_URI=${MLFLOW_TRACKING_URI}
+    image: "nassarx/mlflow-starter-server:1.0"
+    environment:
+      - MLFLOW_BACKEND=${MLFLOW_BACKEND}
+      - MLFLOW_TRACKING_URI=${MLFLOW_TRACKING_URI}
+    expose:
+      - "${MLFLOW_SERVER_PORT}"
+    ports:
+      - "${MLFLOW_SERVER_HOST_PORT}:${MLFLOW_SERVER_PORT}"
+    volumes:
+      - ./mlflow_files:/app/mlflow
+
+networks:
+  default:
+    name: mlflow-starter
