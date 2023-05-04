@@ -1,11 +1,12 @@
-#FROM jupyter/scipy-notebook
 ARG JUPYTER_BASE_IMAGE="scipy-notebook"
 ARG JUPYTER_BASE_VERSION="latest"
 FROM jupyter/${JUPYTER_BASE_IMAGE}:${JUPYTER_BASE_VERSION} AS jupyter
 
 LABEL maintainer="mahmoud@nassarx.com"
 LABEL version="1.0"
-LABEL description="Jupyter notebook Docker Image for Development (MLOps Classes)"
+LABEL description="Jupyter notebook Docker Image for Development."
+
+WORKDIR "${HOME}"
 
 # Set User to Root
 USER root
@@ -20,8 +21,6 @@ RUN apt-get update &&  \
 
 # Set User back to Jovyan
 USER ${NB_UID}
-
-ARG MLFLOW_VERSION
 
 # Install torch
 RUN python3 -m pip install --upgrade pip && \
@@ -39,7 +38,13 @@ RUN python3 -m pip install -U --no-cache-dir -r /home/${NB_USER}/requirements.tx
 
 USER ${NB_UID}
 
-WORKDIR "${HOME}"
+# Create the mlruns directory
+ARG MLRUNS_PATH="/home/${NB_USER}/mlruns"
+RUN mkdir -p $MLRUNS_PATH
+
+# Set permissions for mlruns directory
+RUN chown -R ${NB_USER} $MLRUNS_PATH
+RUN chmod -R a+rw $MLRUNS_PATH
 
 # Start Jupyter
 CMD ["jupyter", "notebook", "list"]

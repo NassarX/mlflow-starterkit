@@ -13,24 +13,16 @@ USER root
 # Set the working directory
 ENV APP_HOME=/home
 ARG APP_HOME="${APP_HOME}"
-
-ARG MLFLOW_SERVER_PORT
-ENV MLFLOW_SERVER_PORT=${MLFLOW_SERVER_PORT}
+#ARG MLFLOW_CONTAINER_ROOT_DIR
 
 # MLflow version
 ARG MLFLOW_VERSION
 
-# Set the default for tracking URI environment variable
-ENV MLFLOW_BACKEND_STORE="/home/jovyan/mlruns"
-ENV MLFLOW_TRACKING_URI="/home/jovyan/mlruns"
+# Set the MLflow server port
+ARG MLFLOW_SERVER_PORT
+ENV MLFLOW_SERVER_PORT=${MLFLOW_SERVER_PORT}
 
 WORKDIR $APP_HOME
-RUN mkdir -p /home/jovyan/mlruns
-
-# Create a user
-RUN useradd -m -s /bin/bash -N -u 1000 jovyan
-RUN chown -R jovyan /home/jovyan/mlruns
-RUN chmod -R a+rw /home/jovyan/mlruns
 
 # Install dependencies
 RUN apt-get update && \
@@ -47,7 +39,7 @@ RUN apt-get update && \
 RUN pip install --upgrade pip
 RUN pip install mlflow==$MLFLOW_VERSION
 
-# Copy config files
+# Copy and install config files
 COPY ./config/requirements.txt $APP_HOME/requirements.txt
 RUN pip install -U --no-cache-dir -r $APP_HOME/requirements.txt
 
