@@ -6,9 +6,8 @@ services:
     build:
       context: ./docker/jupyter
       args:
-        - MLFLOW_VERSION=${MLFLOW_VERSION}
-        - JUPYTER_BASE_IMAGE=${JUPYTER_SCIPY_IMAGE}
-        - JUPYTER_BASE_VERSION=${JUPYTER_SCIPY_VERSION}
+        - JUPYTER_BASE_IMAGE=${JUPYTER_BASE_IMAGE}
+        - JUPYTER_BASE_VERSION=${JUPYTER_BASE_VERSION}
     image: "nassarx/mlflow-starter-notebook:1.0"
     ports:
       - "${JUPYTER_HOST_PORT}:${JUPYTER_PORT}"
@@ -18,6 +17,10 @@ services:
     command: "start-notebook.sh --NotebookApp.token=${JUPYTER_TOKEN}"
     volumes:
       - ./notebooks:/home/jovyan/work
+      - ./mlruns:/home/jovyan/mlruns
+    depends_on:
+      - mlflow-starter-server
+
   mlflow-starter-server:
     container_name: mlflow-starter-server
     build:
@@ -27,8 +30,6 @@ services:
         - DEBIAN_VERSION=${DEBIAN_VERSION}
         - MLFLOW_VERSION=${MLFLOW_VERSION}
         - MLFLOW_SERVER_PORT=${MLFLOW_SERVER_PORT}
-        - MLFLOW_BACKEND_STORE=${MLFLOW_BACKEND_STORE}
-        - MLFLOW_TRACKING_URI=${MLFLOW_TRACKING_URI}
     image: "nassarx/mlflow-starter-server:1.0"
     environment:
       - MLFLOW_BACKEND_STORE=${MLFLOW_BACKEND_STORE}
@@ -38,7 +39,8 @@ services:
     ports:
       - "${MLFLOW_SERVER_HOST_PORT}:${MLFLOW_SERVER_PORT}"
     volumes:
-      - ./_mlflow:/home/jovyan
+      - ./mlruns:${MLFLOW_TRACKING_URI} # as models are not saved locally like metadata, we need to mount the mlruns from mlflow server itself
+
 networks:
   default:
     name: mlflow-starter
