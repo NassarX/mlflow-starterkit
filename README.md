@@ -62,12 +62,11 @@ Make sure to copy the `.env.example` file located in the root directory of the p
 #### JUPYTER NOTEBOOK
 | Variable | Description                    | Default Value            |
 | --- |--------------------------------|--------------------------|
-| `JUPYTER_IMAGE` | Jupyter Notebook image         | `jupyter/scipy-notebook` |
-| `MLFLOW_IMAGE` | MLflow server image            | `python:3.10-slim`       |
+| `JUPYTER_BASE_IMAGE` | Jupyter Notebook Base image    | `jupyter/scipy-notebook` |
+| `JUPYTER_BASE_VERSION` | Jupyter Notebook Image Version | `latest`                 |
 | `JUPYTER_PORT` | Jupyter Notebook port          | `8888`                   |
 | `JUPYTER_HOST_PORT` | Jupyter Notebook host port     | `8899`                   |
 | `JUPYTER_TOKEN` | Jupyter Notebook default token | `jupyter`                |
-| `MLFLOW_VERSION` | MLflow version                 | `2.3.1`                  |
  
 
 #### MLFLOW SERVER
@@ -75,6 +74,7 @@ Make sure to copy the `.env.example` file located in the root directory of the p
 | --- |--------------------------------|--------------------------|
 | `PYTHON_VERSION` | Python version                 | `3.10`                   |
 | `DEBIAN_VERSION` | Debian version                 | `slim-buster`            |
+| `MLFLOW_VERSION` | MLflow version                 | `2.3.1`                  |
 | `MLFLOW_SERVER_PORT` | MLflow server port             | `5000`                   |
 | `MLFLOW_SERVER_HOST_PORT` | MLflow server host port        | `5001`                   |
 | `MLFLOW_BACKEND_STORE` | MLflow backend store           | `/home/jovyan/mlruns`    |
@@ -90,15 +90,20 @@ In case you want to run the Jupyter Notebook container only, run the following c
 To build and run the Jupyter Notebook container:
 
 ```bash
-docker build -t nassarx/mlflow-starter-notebook:1.0 -f ./docker/jupyter/Dockerfile \
---build-arg MLFLOW_VERSION=<version> \
+docker build -t nassarx/mlflow-starter-notebook:1.0 \
+-f ./docker/jupyter \
 --build-arg JUPYTER_BASE_IMAGE=<image> \
 --build-arg JUPYTER_BASE_VERSION=<version> .
 ```
 
 ```bash
-docker run -p <host_port>:<container_port> -e GRANT_SUDO=yes -e JUPYTER_TOKEN=<token> \
--v <local_notebooks_dir>:/home/jovyan/work nassarx/mlflow-starter-notebook:1.0
+docker run \
+-p <host_port>:<container_port> \
+-e GRANT_SUDO=yes \
+-e JUPYTER_TOKEN=<token> \
+-v <local_notebooks_dir>:/home/jovyan/work \
+-v <local_mlruns_dir>:/home/jovyan/mlruns \
+nassarx/mlflow-starter-notebook:1.0
 ```
 
 Or simply run the following command to build and run the container from docker-compose:
@@ -113,9 +118,12 @@ In case you want to run the MLflow server container only, run the following comm
 
 To build and run the MLflow server container, run the following commands:
 ```bash
-docker build -t nassarx/mlflow-starter-server:1.0 ./docker/mlflow --build-arg PYTHON_VERSION=<version> \
---build-arg DEBIAN_VERSION=<version> --build-arg MLFLOW_VERSION=<version> --build-arg MLFLOW_SERVER_PORT=<port> \
---build-arg MLFLOW_BACKEND_STORE=<store_uri> --build-arg MLFLOW_TRACKING_URI=<tracking_uri> .
+docker build -t nassarx/mlflow-starter-server:1.0 \
+-f ./docker/mlflow \
+--build-arg PYTHON_VERSION=<version> \
+--build-arg DEBIAN_VERSION=<version> \
+--build-arg MLFLOW_VERSION=<version> \
+--build-arg MLFLOW_SERVER_PORT=<port> .
 ```
 
 ```bash
@@ -123,7 +131,7 @@ docker run --name mlflow-starter-server \
 -p <host_port>:<container_port> \
 -e MLFLOW_BACKEND_STORE=<backend_store> \
 -e MLFLOW_TRACKING_URI=<tracking_uri> \
--v <local_mlflow_dir>:/home/jovyan \
+-v <local_mlflow_dir>:/home/jovyan/mlruns \
 nassarx/mlflow-starter-server:1.0
 ```
 
@@ -166,14 +174,12 @@ or configure your IDE to connect to the notebook server using the following URL:
 
 ````
 .
-├── _mlflow
-│   └── mlruns
-│       ├── 0
-│       ├── 24552641888*****
-│       ├── 31988532510*****
-│       ├── 61683865883*****
-│       ├── etc
-│       └── models
+├── mlruns
+│   ├── 24552641888*****
+│   ├── 31988532510*****
+│   ├── 61683865883*****
+│   ├── etc
+│   └── models
 ├── docker
 │   ├── jupyter
 │   │   └── config
