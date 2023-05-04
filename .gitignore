@@ -15,6 +15,7 @@ diffout/
 .idea/
 
 mlflow_files/*
+_mlflow
 
 
 # Byte-compiled / optimized / DLL files
