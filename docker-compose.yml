@@ -1,6 +1,24 @@
 version: '3.9'
 
 services:
+  mlflow-starter-app:
+    container_name: mlflow-starter-app
+    build:
+      context: ./docker/app
+      args:
+        - PYTHON_VERSION=${PYTHON_VERSION}
+        - DEBIAN_VERSION=${DEBIAN_VERSION}
+        - MLFLOW_VERSION=${MLFLOW_VERSION}
+        - MLFLOW_SERVER_PORT=${MLFLOW_SERVER_PORT}
+    image: "nassarx/airbnb-nlp-app:1.0"
+    #restart: always
+    volumes:
+      - ./app:/code/app
+      - ./models:/code/app/models
+    ports:
+      - "80:80"
+      - "5678:5678"
+
   mlflow-starter-notebook:
     container_name: mlflow-starter-notebook
     build:
@@ -17,7 +35,7 @@ services:
     command: "start-notebook.sh --NotebookApp.token=${JUPYTER_TOKEN}"
     volumes:
       - ./notebooks:/home/jovyan/work
-      - ./models:${MLFLOW_TRACKING_URI}
+      - ./models:${MLFLOW_TRACKING_URI}:rw
     depends_on:
       - mlflow-starter-server
 
@@ -40,7 +58,7 @@ services:
       - "${MLFLOW_SERVER_HOST_PORT}:${MLFLOW_SERVER_PORT}"
     volumes:
       - ./mlruns:/mlflow/mlruns
-
+      - ./models:${MLFLOW_TRACKING_URI}:r
 networks:
   default:
     name: mlflow-starter
