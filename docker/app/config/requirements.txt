@@ -1,0 +1,12 @@
+fastapi==0.95.1
+requests==2.26.0
+uvicorn==0.22.0
+debugpy==1.6.7
+pytest==7.3.1
+httpx==0.24.0
+loguru==0.7.0
+torch==2.0.0
+mlflow==2.3.1
+pandas==2.0.1
+cloudpickle==2.2.1
+vadersentiment==3.3.2
