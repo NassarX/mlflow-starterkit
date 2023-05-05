@@ -17,7 +17,7 @@ services:
     command: "start-notebook.sh --NotebookApp.token=${JUPYTER_TOKEN}"
     volumes:
       - ./notebooks:/home/jovyan/work
-      - ./mlruns:/home/jovyan/mlruns
+      - ./models:${MLFLOW_TRACKING_URI}
     depends_on:
       - mlflow-starter-server
 
@@ -39,7 +39,7 @@ services:
     ports:
       - "${MLFLOW_SERVER_HOST_PORT}:${MLFLOW_SERVER_PORT}"
     volumes:
-      - ./mlruns:${MLFLOW_TRACKING_URI} # as models are not saved locally like metadata, we need to mount the mlruns from mlflow server itself
+      - ./mlruns:/mlflow/mlruns
 
 networks:
   default:
