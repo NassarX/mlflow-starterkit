@@ -26,16 +26,15 @@ A Dockerized environment for [Jupyter](https://jupyter-docker-stacks.readthedocs
 
 Setting up the necessary environment for your next project can be a time-consuming and frustrating process. This became clear during my recent MLOps class where many of us struggled to set up Jupyter Notebook and MLflow server environments.
 
-The project allows for easy customization of Jupyter Notebook and MLflow server configurations through Docker Compose, making it easy to switch between different setups. By simplifying the connection between Jupyter and MLflow servers, this project saves time and effort for both students and professionals, allowing them to focus on their work and data science projects.
+The project allows for easy customization of Jupyter Notebook and MLflow server configurations through Docker Compose, making it easy to switch between different setups.
 
 ## Features
 
 - Dockerized environment for Jupyter notebooks and MLflow server, allowing for easy setup and deployment.
 - Choice of Jupyter Notebook stacks including `jupyter/minimal-notebook`, `jupyter/scipy-notebook`, and `jupyter/all-spark-notebook`, and more.
-- Customizable environment with the option to add additional dependencies via the requirements.txt file.
+- **MLFlow Configurable Metadata Store**: The flexibility to configure [metadata](https://mlflow.org/docs/latest/tracking.html) (e.g. metrics, parameters) store. You can choose to use a relational database like MySQL, PostgreSQL or SQLite by default. Alternatively, you can configure the system to use Amazon S3 for storing the metadata.
+- **MLFlowConfigurable Artifact Store**:  The flexibility to configure [artifacts](https://www.mlflow.org/docs/latest/tracking.html#storage) store. By default, the artifacts are stored on the local file system. However, you can configure the system to use a cloud storage as AWS S3, Google Cloud Storage, or Azure.
 - Streamlined connection between Jupyter Notebook and MLflow server.
-- Option to switch between different Jupyter Notebook and MLflow server configurations, managed through Docker Compose.
-- Simplifies technical setup, allowing users to focus on their data science projects.
 
 ## Quick Start
 
@@ -63,12 +62,11 @@ Make sure to copy the `.env.example` file located in the root directory of the p
 #### JUPYTER NOTEBOOK
 | Variable | Description                    | Default Value            |
 | --- |--------------------------------|--------------------------|
-| `JUPYTER_IMAGE` | Jupyter Notebook image         | `jupyter/scipy-notebook` |
-| `MLFLOW_IMAGE` | MLflow server image            | `python:3.10-slim`       |
+| `JUPYTER_BASE_IMAGE` | Jupyter Notebook Base image    | `jupyter/scipy-notebook` |
+| `JUPYTER_BASE_VERSION` | Jupyter Notebook Image Version | `latest`                 |
 | `JUPYTER_PORT` | Jupyter Notebook port          | `8888`                   |
 | `JUPYTER_HOST_PORT` | Jupyter Notebook host port     | `8899`                   |
 | `JUPYTER_TOKEN` | Jupyter Notebook default token | `jupyter`                |
-| `MLFLOW_VERSION` | MLflow version                 | `2.3.1`                  |
  
 
 #### MLFLOW SERVER
@@ -76,6 +74,7 @@ Make sure to copy the `.env.example` file located in the root directory of the p
 | --- |--------------------------------|--------------------------|
 | `PYTHON_VERSION` | Python version                 | `3.10`                   |
 | `DEBIAN_VERSION` | Debian version                 | `slim-buster`            |
+| `MLFLOW_VERSION` | MLflow version                 | `2.3.1`                  |
 | `MLFLOW_SERVER_PORT` | MLflow server port             | `5000`                   |
 | `MLFLOW_SERVER_HOST_PORT` | MLflow server host port        | `5001`                   |
 | `MLFLOW_BACKEND_STORE` | MLflow backend store           | `/home/jovyan/mlruns`    |
@@ -91,15 +90,20 @@ In case you want to run the Jupyter Notebook container only, run the following c
 To build and run the Jupyter Notebook container:
 
 ```bash
-docker build -t nassarx/mlflow-starter-notebook:1.0 -f ./docker/jupyter/Dockerfile \
---build-arg MLFLOW_VERSION=<version> \
+docker build -t nassarx/mlflow-starter-notebook:1.0 \
+-f ./docker/jupyter \
 --build-arg JUPYTER_BASE_IMAGE=<image> \
 --build-arg JUPYTER_BASE_VERSION=<version> .
 ```
 
 ```bash
-docker run -p <host_port>:<container_port> -e GRANT_SUDO=yes -e JUPYTER_TOKEN=<token> \
--v <local_notebooks_dir>:/home/jovyan/work nassarx/mlflow-starter-notebook:1.0
+docker run \
+-p <host_port>:<container_port> \
+-e GRANT_SUDO=yes \
+-e JUPYTER_TOKEN=<token> \
+-v <local_notebooks_dir>:/home/jovyan/work \
+-v <local_mlruns_dir>:/home/jovyan/mlruns \
+nassarx/mlflow-starter-notebook:1.0
 ```
 
 Or simply run the following command to build and run the container from docker-compose:
@@ -114,9 +118,12 @@ In case you want to run the MLflow server container only, run the following comm
 
 To build and run the MLflow server container, run the following commands:
 ```bash
-docker build -t nassarx/mlflow-starter-server:1.0 ./docker/mlflow --build-arg PYTHON_VERSION=<version> \
---build-arg DEBIAN_VERSION=<version> --build-arg MLFLOW_VERSION=<version> --build-arg MLFLOW_SERVER_PORT=<port> \
---build-arg MLFLOW_BACKEND_STORE=<store_uri> --build-arg MLFLOW_TRACKING_URI=<tracking_uri> .
+docker build -t nassarx/mlflow-starter-server:1.0 \
+-f ./docker/mlflow \
+--build-arg PYTHON_VERSION=<version> \
+--build-arg DEBIAN_VERSION=<version> \
+--build-arg MLFLOW_VERSION=<version> \
+--build-arg MLFLOW_SERVER_PORT=<port> .
 ```
 
 ```bash
@@ -124,7 +131,7 @@ docker run --name mlflow-starter-server \
 -p <host_port>:<container_port> \
 -e MLFLOW_BACKEND_STORE=<backend_store> \
 -e MLFLOW_TRACKING_URI=<tracking_uri> \
--v <local_mlflow_dir>:/home/jovyan \
+-v <local_mlflow_dir>:/home/jovyan/mlruns \
 nassarx/mlflow-starter-server:1.0
 ```
 
@@ -167,14 +174,12 @@ or configure your IDE to connect to the notebook server using the following URL:
 
 ````
 .
-├── _mlflow
-│   └── mlruns
-│       ├── 0
-│       ├── 24552641888*****
-│       ├── 31988532510*****
-│       ├── 61683865883*****
-│       ├── etc
-│       └── models
+├── mlruns
+│   ├── 24552641888*****
+│   ├── 31988532510*****
+│   ├── 61683865883*****
+│   ├── etc
+│   └── models
 ├── docker
 │   ├── jupyter
 │   │   └── config
@@ -193,14 +198,34 @@ or configure your IDE to connect to the notebook server using the following URL:
 
 ## Usage
 
-To connect to mlflow server from jupyter notebook, you can use the following code snippet:
+- To connect to mlflow server from jupyter notebook running on the same network, use the following code:
 
-```python
-mlflow.set_tracking_uri("http://mlflow-starter-server:5000")
-```
+  ```python
+  mlflow.set_tracking_uri("http://mlflow-starter-server:5000")
+  ```
 
 **Note: The `mlflow-starter-server` is the name of the container running the mlflow server.**
+
+- To connect to mlflow server from jupyter notebook running on a different network, use the following code:
+
+  ```python
+  mlflow.set_tracking_uri("http://<host_ip>:5001")
+  ```
+
+**Note: The `host_ip` is the ip address of the host machine running the mlflow server, could be your local machine (localhost) or a remote server.**
+
+## Future Work
+
+As part of ongoing development, we plan to extend the capabilities of the project to make it more versatile and customizable. Specifically, we plan to add the following features:
+
+- [ ] Configure PostgreSQL, MySQL, or SQLite as a backend store for storing metadata such as metrics, parameters, and tags.
+- [ ] Configure AWS S3, Google Cloud Storage, or Azure Blob Storage as artifact stores for storing the model artifacts and other output files generated during the experiments.
+- [ ] Provide an abstract configuration interface that allows users to easily switch between different backend stores and artifact stores based on their needs and preferences.
+- [ ] Enhance the integration with other popular ML frameworks and libraries beside PyTorch such as TensorFlow to support a wider range of use cases and workflows.
 
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+## License
+[MIT](https://choosealicense.com/licenses/mit/)
