@@ -36,15 +36,5 @@ COPY ./config/* /home/${NB_USER}/
 ## Install dependencies from requirements.txt
 RUN python3 -m pip install -U --no-cache-dir -r /home/${NB_USER}/requirements.txt
 
-USER ${NB_UID}
-
-# Create the mlruns directory
-ARG MLRUNS_PATH="/home/${NB_USER}/mlruns"
-RUN mkdir -p $MLRUNS_PATH
-
-# Set permissions for mlruns directory
-RUN chown -R ${NB_USER} $MLRUNS_PATH
-RUN chmod -R a+rw $MLRUNS_PATH
-
 # Start Jupyter
 CMD ["jupyter", "notebook", "list"]

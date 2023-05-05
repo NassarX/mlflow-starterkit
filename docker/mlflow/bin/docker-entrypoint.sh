@@ -8,7 +8,7 @@ if [ -z "$MLFLOW_BACKEND_STORE" ]; then
 fi
 
 mlflow server \
-    --backend-store-uri "$MLFLOW_TRACKING_URI" \
+    --backend-store-uri "$MLFLOW_BACKEND_STORE" \
     --default-artifact-root "$MLFLOW_TRACKING_URI" \
     --host 0.0.0.0 \
     --port $MLFLOW_SERVER_PORT
