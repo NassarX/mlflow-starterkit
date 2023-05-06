@@ -77,9 +77,9 @@ Make sure to copy the `.env.example` file located in the root directory of the p
 | `MLFLOW_VERSION`          | MLflow version          | `2.3.1`                  |
 | `MLFLOW_SERVER_PORT`      | MLflow server port      | `5000`                   |
 | `MLFLOW_SERVER_HOST_PORT` | MLflow server host port | `5001`                   |
-| `MLFLOW_TRACKING_URI`    | MLFLOW TRACKING URI     | `sqlite:////mlflow/mlruns/runs.db`    |
 | `MLFLOW_BACKEND_STORE`    | MLflow backend store    | `sqlite:////mlflow/mlruns/runs.db`    |
-| `MLFLOW_ARTIFACT_STORE`   | MLflow artifact store   | `/home/jovyan/mlruns`    |
+| `MLFLOW_ARTIFACT_STORE`   | MLflow artifact store   | `/home/jovyan/artifacts`    |
+| `MLFLOW_TRACKING_URI`     | MLFLOW TRACKING URI     | `http://mlflow-starter-server:5000`    |
 
 **Note**:
 
@@ -91,10 +91,6 @@ An MLflow tracking server has 3 components for storage: locally and remotlly.
   - example: `file:///local/path/mlruns` or `s3://bucket/path` or `azure://bucket/path` or `hdfs://namenode/path` or `file:///local/path`
 - [`MLFLOW_TRACKING_URI`](https://mlflow.org/docs/0.9.0/tracking.html#where-runs-are-recorded): Environment variable To log runs same as `MLFLOW_BACKEND_STORE` but remotely.
   - example: `http://localhost:5000`, `https://my-tracking-server:5000` or `databricks://<profileName>`.
-
-# [gc://bucket/path, s3://bucket/path, azure://bucket/path, hdfs://namenode/path, file:///local/path]
-MLFLOW_TRACKING_URI=/home/jovyan/mlflow/artifacts
-
 
 ### Up And Running
 
@@ -195,7 +191,9 @@ or configure your IDE to connect to the notebook server using the following URL:
 │   ├── 31988532510*****
 │   ├── 61683865883*****
 │   ├── etc
-│   └── models
+├── models
+│   ├── 1
+│   ├── 2
 ├── docker
 │   ├── jupyter
 │   │   └── config
