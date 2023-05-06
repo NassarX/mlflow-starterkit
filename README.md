@@ -70,15 +70,31 @@ Make sure to copy the `.env.example` file located in the root directory of the p
  
 
 #### MLFLOW SERVER
-| Variable | Description                    | Default Value            |
-| --- |--------------------------------|--------------------------|
-| `PYTHON_VERSION` | Python version                 | `3.10`                   |
-| `DEBIAN_VERSION` | Debian version                 | `slim-buster`            |
-| `MLFLOW_VERSION` | MLflow version                 | `2.3.1`                  |
-| `MLFLOW_SERVER_PORT` | MLflow server port             | `5000`                   |
-| `MLFLOW_SERVER_HOST_PORT` | MLflow server host port        | `5001`                   |
-| `MLFLOW_BACKEND_STORE` | MLflow backend store           | `sqlite:////mlflow/mlruns/mlflow_runs.db`    |
-| `MLFLOW_TRACKING_URI` | MLflow tracking URI            | `/home/jovyan/mlruns`    |
+| Variable                  | Description             | Default Value            |
+|---------------------------|-------------------------|--------------------------|
+| `PYTHON_VERSION`          | Python version          | `3.10`                   |
+| `DEBIAN_VERSION`          | Debian version          | `slim-buster`            |
+| `MLFLOW_VERSION`          | MLflow version          | `2.3.1`                  |
+| `MLFLOW_SERVER_PORT`      | MLflow server port      | `5000`                   |
+| `MLFLOW_SERVER_HOST_PORT` | MLflow server host port | `5001`                   |
+| `MLFLOW_TRACKING_URI`    | MLFLOW TRACKING URI     | `sqlite:////mlflow/mlruns/runs.db`    |
+| `MLFLOW_BACKEND_STORE`    | MLflow backend store    | `sqlite:////mlflow/mlruns/runs.db`    |
+| `MLFLOW_ARTIFACT_STORE`   | MLflow artifact store   | `/home/jovyan/mlruns`    |
+
+**Note**:
+
+An MLflow tracking server has 3 components for storage: locally and remotlly.
+
+- [`MLFLOW_BACKEND_STORE`](https://mlflow.org/docs/0.9.0/tracking.html#storage): The backend store is where MLflow Tracking Server stores experiment and run metadata (params, metrics, and tags). It could be a file store or database-backed store like MySQL, PostgreSQL or SQLite by default. **Stored locally MLflow Server**.
+  - example: `sqlite:////mlflow/mlruns.db` or `postgresql://username:password@host:port/database`.
+- [`MLFLOW_ARTIFACT_STORE`](https://mlflow.org/docs/0.9.0/tracking.html#storage): The artifact store is a location suitable for large data (such as an S3 bucket or shared NFS file system) and is where clients log their artifact output (for example, models).
+  - example: `file:///local/path/mlruns` or `s3://bucket/path` or `azure://bucket/path` or `hdfs://namenode/path` or `file:///local/path`
+- [`MLFLOW_TRACKING_URI`](https://mlflow.org/docs/0.9.0/tracking.html#where-runs-are-recorded): Environment variable To log runs same as `MLFLOW_BACKEND_STORE` but remotely.
+  - example: `http://localhost:5000`, `https://my-tracking-server:5000` or `databricks://<profileName>`.
+
+# [gc://bucket/path, s3://bucket/path, azure://bucket/path, hdfs://namenode/path, file:///local/path]
+MLFLOW_TRACKING_URI=/home/jovyan/mlflow/artifacts
+
 
 ### Up And Running
 
