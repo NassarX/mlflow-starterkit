@@ -30,12 +30,13 @@ services:
     ports:
       - "${JUPYTER_HOST_PORT}:${JUPYTER_PORT}"
     environment:
-      GRANT_SUDO: "yes"
+      - GRANT_SUDO="yes"
+      - MLFLOW_TRACKING_URI=${MLFLOW_TRACKING_URI}
     user: "root"
     command: "start-notebook.sh --NotebookApp.token=${JUPYTER_TOKEN}"
     volumes:
       - ./notebooks:/home/jovyan/work
-      - ./models:${MLFLOW_TRACKING_URI}:rw
+      - ./models:${MLFLOW_ARTIFACT_STORE}:rw
     depends_on:
       - mlflow-starter-server
 
@@ -51,14 +52,15 @@ services:
     image: "nassarx/mlflow-starter-server:1.0"
     environment:
       - MLFLOW_BACKEND_STORE=${MLFLOW_BACKEND_STORE}
-      - MLFLOW_TRACKING_URI=${MLFLOW_TRACKING_URI}
+      - MLFLOW_ARTIFACT_STORE=${MLFLOW_ARTIFACT_STORE}
     expose:
       - "${MLFLOW_SERVER_PORT}"
     ports:
       - "${MLFLOW_SERVER_HOST_PORT}:${MLFLOW_SERVER_PORT}"
     volumes:
-      - ./mlruns:/mlflow/mlruns
-      - ./models:${MLFLOW_TRACKING_URI}:r
+      - ./mlruns:${MLFLOW_BACKEND_DIR}:rw
+      - ./models:${MLFLOW_ARTIFACT_STORE}:ro
+
 networks:
   default:
     name: mlflow-starter
