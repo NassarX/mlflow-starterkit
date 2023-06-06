@@ -61,6 +61,24 @@ services:
       - ./mlruns:${MLFLOW_BACKEND_DIR}:rw
       - ./models:${MLFLOW_ARTIFACT_STORE}:ro
 
+  mlflow-starter-kedro:
+    container_name: mlflow-starter-kedro
+    build:
+      context: ./docker/kedro
+      args:
+        - PYTHON_VERSION=${PYTHON_VERSION}
+        - DEBIAN_VERSION=${DEBIAN_VERSION}
+        - PROJECT_NAME=${PROJECT_NAME}
+        - OUTPUT_DIR=${OUTPUT_DIR}
+        - REPO_NAME=${REPO_NAME}
+        - PYTHON_PACKAGE=${PYTHON_PACKAGE}
+    image: "nassarx/kedro_mlflow:1.0"
+    volumes:
+      - ./kedro_mlflow:/home/kedro/projects
+    ports:
+      - "8889:8888"
+      - "4142:4141"
+
 networks:
   default:
     name: mlflow-starter
