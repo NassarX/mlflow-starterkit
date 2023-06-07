@@ -19,27 +19,6 @@ services:
       - "80:80"
       - "5678:5678"
 
-  mlflow-starter-notebook:
-    container_name: mlflow-starter-notebook
-    build:
-      context: ./docker/jupyter
-      args:
-        - JUPYTER_BASE_IMAGE=${JUPYTER_BASE_IMAGE}
-        - JUPYTER_BASE_VERSION=${JUPYTER_BASE_VERSION}
-    image: "nassarx/mlflow-starter-notebook:1.0"
-    ports:
-      - "${JUPYTER_HOST_PORT}:${JUPYTER_PORT}"
-    environment:
-      - GRANT_SUDO="yes"
-      - MLFLOW_TRACKING_URI=${MLFLOW_TRACKING_URI}
-    user: "root"
-    command: "start-notebook.sh --NotebookApp.token=${JUPYTER_TOKEN}"
-    volumes:
-      - ./notebooks:/home/jovyan/work
-      - ./models:${MLFLOW_ARTIFACT_STORE}:rw
-    depends_on:
-      - mlflow-starter-server
-
   mlflow-starter-server:
     container_name: mlflow-starter-server
     build:
