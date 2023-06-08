@@ -1,36 +1,37 @@
 #!/bin/bash
 
-# Define the path to the prompts.yml file
-PROMPTS_FILE="/tmp/prompts.yml"
+# Install the Python packages from requirements.txt
+export PATH="${APP_HOME}/.local/bin:$PATH"
 
-# Create OUTPUT_DIR if it doesn't exist
-mkdir -p "${OUTPUT_DIR}"
+# Check if the directory exists
+if [[ ! -d "${APP_HOME}/${OUTPUT_DIR}/${REPO_NAME}" ]]; then
 
-# Create the prompts.yml file
-cat << EOF > "$PROMPTS_FILE"
+  # Define the path to the prompts.yml file
+  PROMPTS_FILE="/tmp/prompts.yml"
+
+  # Create OUTPUT_DIR if it doesn't exist
+  mkdir -p "${OUTPUT_DIR}"
+
+  # Create the prompts.yml file
+  cat <<EOF >"$PROMPTS_FILE"
 project_name: ${PROJECT_NAME}
-output_dir: ${OUTPUT_DIR}
+output_dir: ./${OUTPUT_DIR}
 repo_name: ${REPO_NAME}
 python_package: ${PYTHON_PACKAGE}
 EOF
 
-# Check if the directory exists
-if [[ ! -d "${OUTPUT_DIR}/${REPO_NAME}" ]]; then
   # Create a new Kedro project
-  kedro new --config "$PROMPTS_FILE" --starter=pandas-iris --verbose
+  kedro new --config "$PROMPTS_FILE" --starter=pandas-iris
+
 fi
 
 # Change directory to the Kedro project directory
 # shellcheck disable=SC2164
-cd "${OUTPUT_DIR}/${REPO_NAME}"
+cd "${APP_HOME}/${OUTPUT_DIR}/${REPO_NAME}"
+pip install -r "src/requirements.txt" >/dev/null 2>&1
 
-# Install the Python packages from requirements.txt
-pip install -r "src/requirements.txt"
-
-export PATH="${APP_HOME}/.local/bin:$PATH"
-
-# Run Kedro command: run
-yes | kedro run &
+# Initialize the MLflow tracking server
+kedro mlflow init
 
 # Run the command
 exec "$@"

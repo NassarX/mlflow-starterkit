@@ -11,7 +11,7 @@ LABEL description="MLFlow Docker Image for Development (MLOps Classes)"
 USER root
 
 # Set the working directory
-ENV APP_HOME=/mlflow
+ENV APP_HOME=/home/jovyan
 ARG APP_HOME="${APP_HOME}"
 
 # MLflow version

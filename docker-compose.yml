@@ -1,8 +1,8 @@
 version: '3.9'
 
 services:
-  mlflow-starter-app:
-    container_name: mlflow-starter-app
+  fastapi-app:
+    container_name: fastapi-app
     build:
       context: ./docker/app
       args:
@@ -10,25 +10,23 @@ services:
         - DEBIAN_VERSION=${DEBIAN_VERSION}
         - MLFLOW_VERSION=${MLFLOW_VERSION}
         - MLFLOW_SERVER_PORT=${MLFLOW_SERVER_PORT}
-    image: "nassarx/airbnb-nlp-app:1.0"
-    #restart: always
+    image: "nassarx/fastapi-app:1.0"
     volumes:
       - ./app:/code/app
-      - ./models:/code/app/models
     ports:
       - "80:80"
       - "5678:5678"
 
-  mlflow-starter-server:
-    container_name: mlflow-starter-server
+  mlflow-server:
+    container_name: mlflow-server
     build:
-      context: ./docker/mlflow
+      context: ./docker/mlflow-server
       args:
         - PYTHON_VERSION=${PYTHON_VERSION}
         - DEBIAN_VERSION=${DEBIAN_VERSION}
         - MLFLOW_VERSION=${MLFLOW_VERSION}
         - MLFLOW_SERVER_PORT=${MLFLOW_SERVER_PORT}
-    image: "nassarx/mlflow-starter-server:1.0"
+    image: "nassarx/mlflow-server:1.0"
     environment:
       - MLFLOW_BACKEND_STORE=${MLFLOW_BACKEND_STORE}
       - MLFLOW_ARTIFACT_STORE=${MLFLOW_ARTIFACT_STORE}
@@ -38,10 +36,12 @@ services:
       - "${MLFLOW_SERVER_HOST_PORT}:${MLFLOW_SERVER_PORT}"
     volumes:
       - ./mlruns:${MLFLOW_BACKEND_DIR}:rw
-      - ./models:${MLFLOW_ARTIFACT_STORE}:ro
+      - ./mlruns/models:${MLFLOW_ARTIFACT_STORE}:rw
+    depends_on:
+      - kedro-framework
 
-  mlflow-starter-kedro:
-    container_name: mlflow-starter-kedro
+  kedro-framework:
+    container_name: kedro-framework-${REPO_NAME}
     build:
       context: ./docker/kedro
       args:
@@ -51,13 +51,16 @@ services:
         - OUTPUT_DIR=${OUTPUT_DIR}
         - REPO_NAME=${REPO_NAME}
         - PYTHON_PACKAGE=${PYTHON_PACKAGE}
-    image: "nassarx/kedro_mlflow:1.0"
+    environment:
+      - GRANT_SUDO="yes"
+    image: ${REPO_NAME}
     volumes:
-      - ./kedro_mlflow:/home/kedro/projects
+      - ./kedro:/home/kedro/${OUTPUT_DIR}
+      - ./mlruns/models:${MLFLOW_ARTIFACT_STORE}
     ports:
       - "8889:8888"
       - "4142:4141"
-
+      - "5002:5000"
 networks:
   default:
     name: mlflow-starter

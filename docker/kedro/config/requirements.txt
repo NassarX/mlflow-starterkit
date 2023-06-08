@@ -7,4 +7,5 @@ pip-tools~=6.5
 cookiecutter==2.1.1
 pytools==2022.1.14
 kedro==0.18.9
+kedro-mlflow==0.11.8
 kedro-viz==6.2.0
