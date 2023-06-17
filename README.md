@@ -70,16 +70,16 @@ Make sure to copy the `.env.example` file located in the root directory of the p
  
 
 #### MLFLOW SERVER
-| Variable                  | Description             | Default Value            |
-|---------------------------|-------------------------|--------------------------|
-| `PYTHON_VERSION`          | Python version          | `3.10`                   |
-| `DEBIAN_VERSION`          | Debian version          | `slim-buster`            |
-| `MLFLOW_VERSION`          | MLflow version          | `2.3.1`                  |
-| `MLFLOW_SERVER_PORT`      | MLflow server port      | `5000`                   |
-| `MLFLOW_SERVER_HOST_PORT` | MLflow server host port | `5001`                   |
-| `MLFLOW_BACKEND_STORE`    | MLflow backend store    | `sqlite:////mlflow/mlruns/runs.db`    |
-| `MLFLOW_ARTIFACT_STORE`   | MLflow artifact store   | `/home/jovyan/artifacts`    |
-| `MLFLOW_TRACKING_URI`     | MLFLOW TRACKING URI     | `http://mlflow-starter-server:5000`    |
+| Variable                  | Description             | Default Value                      |
+|---------------------------|-------------------------|------------------------------------|
+| `PYTHON_VERSION`          | Python version          | `3.10`                             |
+| `DEBIAN_VERSION`          | Debian version          | `slim-buster`                      |
+| `MLFLOW_VERSION`          | MLflow version          | `2.3.1`                            |
+| `MLFLOW_SERVER_PORT`      | MLflow server port      | `5000`                             |
+| `MLFLOW_SERVER_HOST_PORT` | MLflow server host port | `5001`                             |
+| `MLFLOW_BACKEND_STORE`    | MLflow backend store    | `sqlite:////mlflow/mlruns/runs.db` |
+| `MLFLOW_ARTIFACT_STORE`   | MLflow artifact store   | `/home/jovyan/artifacts`           |
+| `MLFLOW_TRACKING_URI`     | MLFLOW TRACKING URI     | `http://mlflow-server:5000`        |
 
 **Note**:
 
@@ -102,7 +102,7 @@ In case you want to run the Jupyter Notebook container only, run the following c
 To build and run the Jupyter Notebook container:
 
 ```bash
-docker build -t nassarx/mlflow-starter-notebook:1.0 \
+docker build -t nassarx/mlflow-notebook:1.0 \
 -f ./docker/jupyter \
 --build-arg JUPYTER_BASE_IMAGE=<image> \
 --build-arg JUPYTER_BASE_VERSION=<version> .
@@ -115,13 +115,13 @@ docker run \
 -e JUPYTER_TOKEN=<token> \
 -v <local_notebooks_dir>:/home/jovyan/work \
 -v <local_mlruns_dir>:/home/jovyan/mlruns \
-nassarx/mlflow-starter-notebook:1.0
+nassarx/mlflow-notebook:1.0
 ```
 
 Or simply run the following command to build and run the container from docker-compose:
 
 ```bash
-docker-compose up mlflow-starter-notebook
+docker-compose up mlflow-notebook
 ```
 
 #### MLflow Server
@@ -130,7 +130,7 @@ In case you want to run the MLflow server container only, run the following comm
 
 To build and run the MLflow server container, run the following commands:
 ```bash
-docker build -t nassarx/mlflow-starter-server:1.0 \
+docker build -t nassarx/mlflow-server:1.0 \
 -f ./docker/mlflow \
 --build-arg PYTHON_VERSION=<version> \
 --build-arg DEBIAN_VERSION=<version> \
@@ -139,18 +139,18 @@ docker build -t nassarx/mlflow-starter-server:1.0 \
 ```
 
 ```bash
-docker run --name mlflow-starter-server \
+docker run --name mlflow-server \
 -p <host_port>:<container_port> \
 -e MLFLOW_BACKEND_STORE=<backend_store> \
 -e MLFLOW_TRACKING_URI=<tracking_uri> \
 -v <local_mlflow_dir>:/home/jovyan/mlruns \
-nassarx/mlflow-starter-server:1.0
+nassarx/mlflow-server:1.0
 ```
 
 Or simply run the following command to build and run the container from docker-compose:
 
 ```bash
-docker-compose up mlflow-starter-server
+docker-compose up mlflow-server
 ```
 
 #### Jupyter Notebook & MLflow Server
@@ -215,10 +215,10 @@ or configure your IDE to connect to the notebook server using the following URL:
 - To connect to mlflow server from jupyter notebook running on the same network, use the following code:
 
   ```python
-  mlflow.set_tracking_uri("http://mlflow-starter-server:5000")
+  mlflow.set_tracking_uri("http://mlflow-server:5000")
   ```
 
-**Note: The `mlflow-starter-server` is the name of the container running the mlflow server.**
+**Note: The `mlflow-server` is the name of the container running the mlflow server.**
 
 - To connect to mlflow server from jupyter notebook running on a different network, use the following code:
 
