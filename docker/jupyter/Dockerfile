@@ -6,7 +6,7 @@ LABEL maintainer="mahmoud@nassarx.com"
 LABEL version="1.0"
 LABEL description="Jupyter notebook Docker Image for Development."
 
-WORKDIR "${HOME}"
+WORKDIR "${HOME}/work"
 
 # Set User to Root
 USER root

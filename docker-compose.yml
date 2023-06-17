@@ -1,14 +1,14 @@
 version: '3.9'
 
 services:
-  mlflow-starter-notebook:
-    container_name: mlflow-starter-notebook
+  jupyter-notebook:
+    container_name: ${COMPOSE_PROJECT_NAME}_jupyter-notebook
     build:
       context: ./docker/jupyter
       args:
         - JUPYTER_BASE_IMAGE=${JUPYTER_BASE_IMAGE}
         - JUPYTER_BASE_VERSION=${JUPYTER_BASE_VERSION}
-    image: "nassarx/mlflow-starter-notebook:1.0"
+    image: "nassarx/jupyter-notebook:1.0"
     ports:
       - "${JUPYTER_HOST_PORT}:${JUPYTER_PORT}"
     environment:
@@ -20,10 +20,10 @@ services:
       - ./notebooks:/home/jovyan/work
       - ./models:${MLFLOW_ARTIFACT_STORE}:rw
     depends_on:
-      - mlflow-starter-server
+      - mlflow-server
 
-  mlflow-starter-server:
-    container_name: mlflow-starter-server
+  mlflow-server:
+    container_name: ${COMPOSE_PROJECT_NAME}_mlflow-server
     build:
       context: ./docker/mlflow
       args:
@@ -31,7 +31,7 @@ services:
         - DEBIAN_VERSION=${DEBIAN_VERSION}
         - MLFLOW_VERSION=${MLFLOW_VERSION}
         - MLFLOW_SERVER_PORT=${MLFLOW_SERVER_PORT}
-    image: "nassarx/mlflow-starter-server:1.0"
+    image: "nassarx/mlflow-server:1.0"
     environment:
       - MLFLOW_BACKEND_STORE=${MLFLOW_BACKEND_STORE}
       - MLFLOW_ARTIFACT_STORE=${MLFLOW_ARTIFACT_STORE}
@@ -45,4 +45,4 @@ services:
 
 networks:
   default:
-    name: mlflow-starter
+    name: ${COMPOSE_PROJECT_NAME}_network
